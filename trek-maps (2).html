@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Trek Maps — Peninjau Jejak Strava</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EAE6DA;
+    --paper-raised:#F2EFE5;
+    --ink:#23301F;
+    --ink-soft:#5B6152;
+    --contour:#9C9483;
+    --contour-faint:#D8D3C3;
+    --trail:#B5562A;
+    --trail-dark:#8F4520;
+    --tarn:#2F5D62;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    line-height:1.45;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .wrap{
+    max-width:720px;
+    margin:0 auto;
+    padding:20px 16px 48px;
+  }
+  header{
+    padding:6px 0 20px;
+    border-bottom:1px solid var(--contour);
+    margin-bottom:20px;
+  }
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size:clamp(28px, 7vw, 38px);
+    margin:0 0 6px;
+    letter-spacing:-0.01em;
+  }
+  header p{
+    margin:0;
+    color:var(--ink-soft);
+    font-size:14.5px;
+    max-width:52ch;
+  }
+
+  .panel{
+    background:var(--paper-raised);
+    border:1px solid var(--contour-faint);
+    border-radius:3px;
+    padding:16px;
+    margin-bottom:16px;
+  }
+
+  #dropzone{
+    border:1.5px dashed var(--contour);
+    border-radius:3px;
+    padding:28px 16px;
+    text-align:center;
+    cursor:pointer;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  #dropzone.drag{
+    border-color:var(--trail);
+    background:rgba(181,86,42,0.06);
+  }
+  #dropzone svg{margin-bottom:10px;}
+  #dropzone .title{font-size:16px;font-weight:600;margin-bottom:4px;}
+  #dropzone .hint{font-size:13px;color:var(--ink-soft);}
+  input[type=file]{display:none;}
+
+  .filelist{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    padding-bottom:2px;
+    margin-top:14px;
+  }
+  .filechip{
+    flex:0 0 auto;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:8px 12px;
+    background:var(--paper);
+    border:1px solid var(--contour-faint);
+    border-radius:20px;
+    font-size:13px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .filechip.active{
+    border-color:var(--trail);
+    background:rgba(181,86,42,0.08);
+    color:var(--trail-dark);
+    font-weight:600;
+  }
+  .filechip button{
+    border:none;
+    background:none;
+    color:var(--ink-soft);
+    cursor:pointer;
+    font-size:14px;
+    line-height:1;
+    padding:0;
+  }
+
+  #empty-state{
+    text-align:center;
+    padding:40px 16px;
+    color:var(--ink-soft);
+    font-size:14px;
+  }
+
+  #result{display:none;}
+
+  #map{
+    height:46vh;
+    min-height:280px;
+    width:100%;
+    border-radius:3px;
+    border:1px solid var(--contour-faint);
+  }
+
+  .activity-name{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:20px;
+    margin:16px 0 12px;
+  }
+
+  .stats{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:1px;
+    background:var(--contour-faint);
+    border:1px solid var(--contour-faint);
+    border-radius:3px;
+    overflow:hidden;
+    margin-bottom:16px;
+  }
+  .stat{
+    background:var(--paper-raised);
+    padding:14px 16px;
+  }
+  .stat .label{
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-bottom:4px;
+  }
+  .stat .value{
+    font-family:'IBM Plex Mono', monospace;
+    font-weight:600;
+    font-size:20px;
+    color:var(--ink);
+  }
+  .stat .value small{
+    font-size:13px;
+    font-weight:500;
+    color:var(--ink-soft);
+    margin-left:2px;
+  }
+
+  .elev-title{
+    font-size:13px;
+    color:var(--ink-soft);
+    margin-bottom:8px;
+  }
+  #elevChart{
+    width:100%;
+    height:100px;
+    display:block;
+  }
+
+  footer{
+    margin-top:24px;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    text-align:center;
+  }
+  footer a{color:var(--trail-dark);}
+
+  .leaflet-container{background:var(--paper);}
+
+  .navpanel{margin:12px 0 16px;}
+  .navbtn{
+    width:100%;
+    padding:13px 16px;
+    background:var(--tarn);
+    color:#fff;
+    border:none;
+    border-radius:3px;
+    font-family:'IBM Plex Sans', sans-serif;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .navbtn.active{background:var(--trail);}
+  .livestatus{
+    margin-top:10px;
+    padding:12px 14px;
+    background:var(--paper-raised);
+    border:1px solid var(--contour-faint);
+    border-radius:3px;
+  }
+  .livestatus-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-weight:600;
+    font-size:14px;
+    margin-bottom:8px;
+  }
+  .dot{
+    width:10px;height:10px;border-radius:50%;
+    background:var(--contour);
+    flex:0 0 auto;
+  }
+  .dot.ok{background:#4C7A3C;}
+  .dot.warn{background:#C7912B;}
+  .dot.bad{background:#B5562A;}
+  .livestatus-sub{
+    display:flex;
+    justify-content:space-between;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    font-family:'IBM Plex Mono', monospace;
+  }
+  .livestatus-sub b{color:var(--ink);font-weight:600;}
+  .followToggle{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-top:10px;
+    font-size:13px;
+    color:var(--ink-soft);
+    cursor:pointer;
+  }
+  .geo-warning{
+    margin-top:10px;
+    padding:10px 12px;
+    background:rgba(181,86,42,0.08);
+    border:1px solid rgba(181,86,42,0.3);
+    border-radius:3px;
+    font-size:12.5px;
+    color:var(--trail-dark);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>Trek Maps</h1>
+    <p>Upload file GPX atau TCX hasil export dari Strava, lihat jalurnya di peta langsung dari HP — tidak perlu server, tidak perlu satu WiFi dengan laptop.</p>
+  </header>
+
+  <div class="panel">
+    <div id="dropzone">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#B5562A" stroke-width="1.6"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+      <div class="title">Ketuk untuk pilih file</div>
+      <div class="hint">.gpx atau .tcx — bisa pilih beberapa sekaligus</div>
+    </div>
+    <input type="file" id="fileInput" accept=".gpx,.tcx" multiple>
+    <div class="filelist" id="filelist"></div>
+  </div>
+
+  <div id="empty-state">Belum ada jejak yang dimuat. Upload file di atas untuk mulai.</div>
+
+  <div id="result">
+    <div class="activity-name" id="activityName"></div>
+    <div id="map"></div>
+
+    <div class="navpanel" id="navpanel">
+      <button id="navToggleBtn" class="navbtn">Mulai Pelacakan Posisi</button>
+      <div id="liveStatus" class="livestatus" style="display:none;">
+        <div class="livestatus-row">
+          <span class="dot" id="statusDot"></span>
+          <span id="statusText">Mencari sinyal GPS…</span>
+        </div>
+        <div class="livestatus-sub">
+          <span>Jarak dari jalur: <b id="offRouteDist">–</b></span>
+          <span>Ditempuh: <b id="liveDistance">–</b></span>
+        </div>
+      </div>
+      <label class="followToggle" id="followToggleWrap" style="display:none;">
+        <input type="checkbox" id="followToggle" checked>
+        Kunci peta ke posisi saya
+      </label>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="label">Jarak</div>
+        <div class="value" id="statDistance">–</div>
+      </div>
+      <div class="stat">
+        <div class="label">Durasi</div>
+        <div class="value" id="statDuration">–</div>
+      </div>
+      <div class="stat">
+        <div class="label">Elevasi naik</div>
+        <div class="value" id="statElev">–</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="elev-title">Profil elevasi</div>
+      <svg id="elevChart" viewBox="0 0 600 100" preserveAspectRatio="none"></svg>
+    </div>
+  </div>
+
+  <footer>
+    Semua diproses di HP kamu sendiri — file tidak dikirim ke server manapun.<br>
+    Peta memakai tile dari OpenStreetMap, jadi tetap butuh koneksi internet (kuota kamu sendiri).<br>
+    Pelacakan posisi live butuh halaman dibuka lewat https agar browser mengizinkan akses GPS.
+  </footer>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+  const tracks = []; // {id, name, points:[{lat,lon,ele,time}]}
+  let activeId = null;
+  let activePoints = null;
+  let map = null, polyline = null, startMarker=null, endMarker=null;
+
+  // live tracking state
+  let watchId = null;
+  let liveMarker = null, liveAccuracyCircle = null;
+  let followMap = true;
+  let liveDistanceM = 0;
+  let lastLivePos = null;
+
+  const navToggleBtn = document.getElementById('navToggleBtn');
+  const liveStatus = document.getElementById('liveStatus');
+  const followToggleWrap = document.getElementById('followToggleWrap');
+  const followToggle = document.getElementById('followToggle');
+
+  navToggleBtn.addEventListener('click', () => {
+    if(watchId === null) startTracking(); else stopTracking();
+  });
+  followToggle.addEventListener('change', e => { followMap = e.target.checked; });
+
+  function startTracking(){
+    if(!('geolocation' in navigator)){
+      showGeoWarning('Browser ini tidak mendukung pelacakan GPS.');
+      return;
+    }
+    liveDistanceM = 0;
+    lastLivePos = null;
+    liveStatus.style.display = 'block';
+    followToggleWrap.style.display = 'flex';
+    navToggleBtn.textContent = 'Hentikan Pelacakan';
+    navToggleBtn.classList.add('active');
+    document.getElementById('statusText').textContent = 'Mencari sinyal GPS…';
+
+    watchId = navigator.geolocation.watchPosition(onLivePosition, onGeoError, {
+      enableHighAccuracy: true,
+      maximumAge: 1000,
+      timeout: 15000
+    });
+  }
+
+  function stopTracking(){
+    if(watchId !== null){
+      navigator.geolocation.clearWatch(watchId);
+      watchId = null;
+    }
+    navToggleBtn.textContent = 'Mulai Pelacakan Posisi';
+    navToggleBtn.classList.remove('active');
+    liveStatus.style.display = 'none';
+    followToggleWrap.style.display = 'none';
+  }
+
+  function onGeoError(err){
+    let msg = 'Tidak bisa mengambil lokasi.';
+    if(err.code === 1) msg = 'Izin lokasi ditolak. Aktifkan izin lokasi untuk situs ini di pengaturan browser.';
+    else if(err.code === 2) msg = 'Lokasi tidak tersedia saat ini.';
+    else if(err.code === 3) msg = 'Waktu tunggu sinyal GPS habis, coba lagi di area terbuka.';
+    if(!window.isSecureContext){
+      msg += ' Catatan: halaman ini perlu dibuka lewat https (bukan file lokal) agar GPS bisa diakses.';
+    }
+    document.getElementById('statusText').textContent = msg;
+    document.getElementById('statusDot').className = 'dot bad';
+  }
+
+  function showGeoWarning(msg){
+    let el = document.getElementById('geoWarning');
+    if(!el){
+      el = document.createElement('div');
+      el.id = 'geoWarning';
+      el.className = 'geo-warning';
+      document.getElementById('navpanel').appendChild(el);
+    }
+    el.textContent = msg;
+  }
+
+  function toXY(lat, lon, refLat){
+    const R = 6371000;
+    const x = (lon * Math.PI/180) * R * Math.cos(refLat * Math.PI/180);
+    const y = (lat * Math.PI/180) * R;
+    return {x, y};
+  }
+
+  function distPointToSegment(p, a, b){
+    const dx = b.x - a.x, dy = b.y - a.y;
+    const lenSq = dx*dx + dy*dy;
+    if(lenSq === 0) return Math.hypot(p.x - a.x, p.y - a.y);
+    let t = ((p.x - a.x)*dx + (p.y - a.y)*dy) / lenSq;
+    t = Math.max(0, Math.min(1, t));
+    return Math.hypot(p.x - (a.x + t*dx), p.y - (a.y + t*dy));
+  }
+
+  function nearestDistanceToRoute(lat, lon, points){
+    const ref = toXY(lat, lon, lat);
+    let minDist = Infinity;
+    for(let i = 1; i < points.length; i++){
+      const a = toXY(points[i-1].lat, points[i-1].lon, lat);
+      const b = toXY(points[i].lat, points[i].lon, lat);
+      const d = distPointToSegment(ref, a, b);
+      if(d < minDist) minDist = d;
+    }
+    return minDist;
+  }
+
+  function onLivePosition(pos){
+    const lat = pos.coords.latitude, lon = pos.coords.longitude;
+    const accuracy = pos.coords.accuracy || 0;
+
+    if(!liveMarker){
+      const icon = L.divIcon({
+        className: '',
+        html: '<div style="width:16px;height:16px;border-radius:50%;background:#2F5D62;border:3px solid white;box-shadow:0 0 0 2px #2F5D62;"></div>',
+        iconSize:[16,16]
+      });
+      liveMarker = L.marker([lat, lon], {icon, zIndexOffset: 1000}).addTo(map);
+      liveAccuracyCircle = L.circle([lat, lon], {radius: accuracy, color:'#2F5D62', weight:1, fillOpacity:0.08}).addTo(map);
+    } else {
+      liveMarker.setLatLng([lat, lon]);
+      liveAccuracyCircle.setLatLng([lat, lon]);
+      liveAccuracyCircle.setRadius(accuracy);
+    }
+
+    if(followMap){
+      map.setView([lat, lon], Math.max(map.getZoom(), 16));
+    }
+
+    if(lastLivePos){
+      liveDistanceM += haversine(lastLivePos, {lat, lon});
+    }
+    lastLivePos = {lat, lon};
+    document.getElementById('liveDistance').textContent = (liveDistanceM/1000).toFixed(2) + ' km';
+
+    if(activePoints && activePoints.length > 1){
+      const dist = nearestDistanceToRoute(lat, lon, activePoints);
+      const dot = document.getElementById('statusDot');
+      const text = document.getElementById('statusText');
+      document.getElementById('offRouteDist').textContent = Math.round(dist) + ' m';
+      if(dist <= 20){
+        dot.className = 'dot ok';
+        text.textContent = 'Di jalur yang benar';
+      } else if(dist <= 60){
+        dot.className = 'dot warn';
+        text.textContent = 'Agak melenceng dari jalur';
+      } else {
+        dot.className = 'dot bad';
+        text.textContent = 'Keluar jalur — cek arah lagi';
+      }
+    }
+  }
+
+  const dropzone = document.getElementById('dropzone');
+  const fileInput = document.getElementById('fileInput');
+  const filelist = document.getElementById('filelist');
+  const emptyState = document.getElementById('empty-state');
+  const resultEl = document.getElementById('result');
+
+  dropzone.addEventListener('click', () => fileInput.click());
+  ['dragover','dragenter'].forEach(ev => dropzone.addEventListener(ev, e => {
+    e.preventDefault(); dropzone.classList.add('drag');
+  }));
+  ['dragleave','drop'].forEach(ev => dropzone.addEventListener(ev, e => {
+    e.preventDefault(); dropzone.classList.remove('drag');
+  }));
+  dropzone.addEventListener('drop', e => {
+    if(e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
+  });
+  fileInput.addEventListener('change', e => {
+    if(e.target.files.length) handleFiles(e.target.files);
+    fileInput.value = '';
+  });
+
+  function handleFiles(fileListObj){
+    Array.from(fileListObj).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = evt => {
+        try{
+          const text = evt.target.result;
+          const isTcx = /\.tcx$/i.test(file.name) || text.includes('TrainingCenterDatabase');
+          const points = isTcx ? parseTCX(text) : parseGPX(text);
+          if(points.length < 2){
+            alert('File "' + file.name + '" tidak berisi data jejak yang bisa dibaca.');
+            return;
+          }
+          const id = 't' + Date.now() + Math.random().toString(16).slice(2);
+          const name = file.name.replace(/\.(gpx|tcx)$/i, '');
+          tracks.push({id, name, points});
+          renderFileList();
+          selectTrack(id);
+        }catch(err){
+          alert('Gagal membaca file "' + file.name + '": ' + err.message);
+        }
+      };
+      reader.readAsText(file);
+    });
+  }
+
+  function parseGPX(text){
+    const xml = new DOMParser().parseFromString(text, 'application/xml');
+    const trkpts = Array.from(xml.getElementsByTagName('trkpt'));
+    return trkpts.map(pt => {
+      const eleEl = pt.getElementsByTagName('ele')[0];
+      const timeEl = pt.getElementsByTagName('time')[0];
+      return {
+        lat: parseFloat(pt.getAttribute('lat')),
+        lon: parseFloat(pt.getAttribute('lon')),
+        ele: eleEl ? parseFloat(eleEl.textContent) : null,
+        time: timeEl ? new Date(timeEl.textContent) : null
+      };
+    }).filter(p => !isNaN(p.lat) && !isNaN(p.lon));
+  }
+
+  function parseTCX(text){
+    const xml = new DOMParser().parseFromString(text, 'application/xml');
+    const tps = Array.from(xml.getElementsByTagName('Trackpoint'));
+    return tps.map(tp => {
+      const posEl = tp.getElementsByTagName('Position')[0];
+      if(!posEl) return null;
+      const latEl = posEl.getElementsByTagName('LatitudeDegrees')[0];
+      const lonEl = posEl.getElementsByTagName('LongitudeDegrees')[0];
+      const eleEl = tp.getElementsByTagName('AltitudeMeters')[0];
+      const timeEl = tp.getElementsByTagName('Time')[0];
+      if(!latEl || !lonEl) return null;
+      return {
+        lat: parseFloat(latEl.textContent),
+        lon: parseFloat(lonEl.textContent),
+        ele: eleEl ? parseFloat(eleEl.textContent) : null,
+        time: timeEl ? new Date(timeEl.textContent) : null
+      };
+    }).filter(p => p && !isNaN(p.lat) && !isNaN(p.lon));
+  }
+
+  function renderFileList(){
+    filelist.innerHTML = '';
+    tracks.forEach(t => {
+      const chip = document.createElement('div');
+      chip.className = 'filechip' + (t.id === activeId ? ' active' : '');
+      chip.innerHTML = '<span class="chipname"></span>';
+      chip.querySelector('.chipname').textContent = t.name;
+      chip.addEventListener('click', () => selectTrack(t.id));
+
+      const removeBtn = document.createElement('button');
+      removeBtn.textContent = '✕';
+      removeBtn.title = 'Hapus';
+      removeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const idx = tracks.findIndex(x => x.id === t.id);
+        if(idx > -1) tracks.splice(idx, 1);
+        if(activeId === t.id){
+          activeId = tracks.length ? tracks[0].id : null;
+        }
+        renderFileList();
+        if(activeId) selectTrack(activeId); else showEmpty();
+      });
+      chip.appendChild(removeBtn);
+      filelist.appendChild(chip);
+    });
+  }
+
+  function showEmpty(){
+    emptyState.style.display = 'block';
+    resultEl.style.display = 'none';
+    stopTracking();
+    activePoints = null;
+  }
+
+  if(!window.isSecureContext){
+    document.addEventListener('DOMContentLoaded', () => {
+      showGeoWarning('Halaman ini dibuka bukan lewat https, jadi pelacakan GPS live kemungkinan tidak akan diizinkan browser. Lihat instruksi hosting di bawah untuk mengaktifkannya.');
+    });
+  }
+
+  function selectTrack(id){
+    activeId = id;
+    renderFileList();
+    const track = tracks.find(t => t.id === id);
+    if(!track) return showEmpty();
+
+    emptyState.style.display = 'none';
+    resultEl.style.display = 'block';
+    document.getElementById('activityName').textContent = track.name;
+    activePoints = track.points;
+    stopTracking();
+
+    drawMap(track.points);
+    drawStats(track.points);
+    drawElevation(track.points);
+  }
+
+  function drawMap(points){
+    const latlngs = points.map(p => [p.lat, p.lon]);
+    if(!map){
+      map = L.map('map');
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+    }
+    if(polyline) map.removeLayer(polyline);
+    if(startMarker) map.removeLayer(startMarker);
+    if(endMarker) map.removeLayer(endMarker);
+
+    polyline = L.polyline(latlngs, {color:'#B5562A', weight:4, opacity:0.9}).addTo(map);
+
+    const startIcon = L.divIcon({className:'', html:'<div style="width:12px;height:12px;border-radius:50%;background:#2F5D62;border:2px solid white;"></div>', iconSize:[12,12]});
+    const endIcon = L.divIcon({className:'', html:'<div style="width:12px;height:12px;border-radius:50%;background:#B5562A;border:2px solid white;"></div>', iconSize:[12,12]});
+    startMarker = L.marker(latlngs[0], {icon:startIcon}).addTo(map);
+    endMarker = L.marker(latlngs[latlngs.length-1], {icon:endIcon}).addTo(map);
+
+    map.fitBounds(polyline.getBounds(), {padding:[24,24]});
+    setTimeout(() => map.invalidateSize(), 150);
+  }
+
+  function haversine(a, b){
+    const R = 6371000;
+    const toRad = d => d * Math.PI / 180;
+    const dLat = toRad(b.lat - a.lat);
+    const dLon = toRad(b.lon - a.lon);
+    const lat1 = toRad(a.lat), lat2 = toRad(b.lat);
+    const h = Math.sin(dLat/2)**2 + Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)**2;
+    return 2 * R * Math.asin(Math.sqrt(h));
+  }
+
+  function drawStats(points){
+    let distance = 0;
+    let elevGain = 0;
+    for(let i = 1; i < points.length; i++){
+      distance += haversine(points[i-1], points[i]);
+      if(points[i].ele != null && points[i-1].ele != null){
+        const diff = points[i].ele - points[i-1].ele;
+        if(diff > 0) elevGain += diff;
+      }
+    }
+    const distKm = distance / 1000;
+
+    let durationMs = null;
+    const first = points.find(p => p.time);
+    const last = [...points].reverse().find(p => p.time);
+    if(first && last && last.time > first.time){
+      durationMs = last.time - first.time;
+    }
+
+    document.getElementById('statDistance').innerHTML = distKm.toFixed(2) + '<small>km</small>';
+    document.getElementById('statElev').innerHTML = Math.round(elevGain) + '<small>m</small>';
+
+    if(durationMs != null){
+      const totalMin = durationMs / 60000;
+      const h = Math.floor(totalMin / 60);
+      const m = Math.round(totalMin % 60);
+      document.getElementById('statDuration').innerHTML = (h > 0 ? h + '<small>j</small> ' : '') + m + '<small>mnt</small>';
+    } else {
+      document.getElementById('statDuration').innerHTML = '–';
+    }
+  }
+
+  function drawElevation(points){
+    const svg = document.getElementById('elevChart');
+    const elevs = points.map(p => p.ele).filter(e => e != null);
+    if(elevs.length < 2){
+      svg.innerHTML = '<text x="300" y="50" text-anchor="middle" font-size="12" fill="#9C9483">Data elevasi tidak tersedia di file ini</text>';
+      return;
+    }
+    const min = Math.min(...elevs);
+    const max = Math.max(...elevs);
+    const range = (max - min) || 1;
+    const w = 600, h = 100, pad = 6;
+
+    const step = w / (points.length - 1);
+    let pathPts = [];
+    points.forEach((p, i) => {
+      if(p.ele == null) return;
+      const x = i * step;
+      const y = pad + (1 - (p.ele - min) / range) * (h - pad*2);
+      pathPts.push(x.toFixed(1) + ',' + y.toFixed(1));
+    });
+
+    const areaPts = 'M0,' + h + ' L' + pathPts.join(' L') + ' L' + w + ',' + h + ' Z';
+    const linePts = 'M' + pathPts.join(' L');
+
+    svg.innerHTML =
+      '<path d="' + areaPts + '" fill="#2F5D62" opacity="0.12"></path>' +
+      '<path d="' + linePts + '" fill="none" stroke="#2F5D62" stroke-width="2"></path>';
+  }
+
+})();
+</script>
+</body>
+</html>
