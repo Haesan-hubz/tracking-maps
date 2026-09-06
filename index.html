@@ -17,7 +17,7 @@
     --contour-faint:#D8D3C3;
     --trail:#B5562A;
     --trail-dark:#8F4520;
-    --tarn:#2F5D62;
+    --tarn:#00008B;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
@@ -259,8 +259,8 @@
 <div class="wrap">
 
   <header>
-    <h1>Trek Maps</h1>
-    <p>Upload file GPX atau TCX hasil export dari Strava, lihat jalurnya di peta langsung dari HP — tidak perlu server, tidak perlu satu WiFi dengan laptop.</p>
+    <h1>Trek Maps 53</h1>
+    <p>Upload file GPX atau TCX .</p>
   </header>
 
   <div class="panel">
@@ -273,7 +273,7 @@
     <div class="filelist" id="filelist"></div>
   </div>
 
-  <div id="empty-state">Belum ada jejak yang dimuat. Upload file di atas untuk mulai.</div>
+  <div id="empty-state">Belum ada track yang dimuat. Upload file untuk mulai.</div>
 
   <div id="result">
     <div class="activity-name" id="activityName"></div>
@@ -319,9 +319,9 @@
   </div>
 
   <footer>
-    Semua diproses di HP kamu sendiri — file tidak dikirim ke server manapun.<br>
-    Peta memakai tile dari OpenStreetMap, jadi tetap butuh koneksi internet (kuota kamu sendiri).<br>
-    Pelacakan posisi live butuh halaman dibuka lewat https agar browser mengizinkan akses GPS.
+    Pelacakan posisi secara real time membutuhkan izin akses lokasi.<br>
+    Peta memakai tile dari OpenStreetMap, jadi tetap memerlukan koneksi internet.<br>
+    File tidak dikirim ke server manapun.
   </footer>
 
 </div>
@@ -437,14 +437,15 @@
     const lat = pos.coords.latitude, lon = pos.coords.longitude;
     const accuracy = pos.coords.accuracy || 0;
 
+    <!-- posisi live -->
     if(!liveMarker){
       const icon = L.divIcon({
         className: '',
-        html: '<div style="width:16px;height:16px;border-radius:50%;background:#2F5D62;border:3px solid white;box-shadow:0 0 0 2px #2F5D62;"></div>',
+        html: '<div style="width:16px;height:16px;border-radius:50%;background:#00008B;border:3px solid white;box-shadow:0 0 0 2px #00008B;"></div>',
         iconSize:[16,16]
       });
       liveMarker = L.marker([lat, lon], {icon, zIndexOffset: 1000}).addTo(map);
-      liveAccuracyCircle = L.circle([lat, lon], {radius: accuracy, color:'#2F5D62', weight:1, fillOpacity:0.08}).addTo(map);
+      liveAccuracyCircle = L.circle([lat, lon], {radius: accuracy, color:'#00008B', weight:1, fillOpacity:0.08}).addTo(map);
     } else {
       liveMarker.setLatLng([lat, lon]);
       liveAccuracyCircle.setLatLng([lat, lon]);
@@ -471,7 +472,7 @@
         text.textContent = 'Di jalur yang benar';
       } else if(dist <= 60){
         dot.className = 'dot warn';
-        text.textContent = 'Agak melenceng dari jalur';
+        text.textContent = 'Melenceng dikit dari jalur';
       } else {
         dot.className = 'dot bad';
         text.textContent = 'Keluar jalur — cek arah lagi';
@@ -632,7 +633,7 @@
 
     polyline = L.polyline(latlngs, {color:'#B5562A', weight:4, opacity:0.9}).addTo(map);
 
-    const startIcon = L.divIcon({className:'', html:'<div style="width:12px;height:12px;border-radius:50%;background:#2F5D62;border:2px solid white;"></div>', iconSize:[12,12]});
+    const startIcon = L.divIcon({className:'', html:'<div style="width:12px;height:12px;border-radius:50%;background:#00008B;border:2px solid white;"></div>', iconSize:[12,12]});
     const endIcon = L.divIcon({className:'', html:'<div style="width:12px;height:12px;border-radius:50%;background:#B5562A;border:2px solid white;"></div>', iconSize:[12,12]});
     startMarker = L.marker(latlngs[0], {icon:startIcon}).addTo(map);
     endMarker = L.marker(latlngs[latlngs.length-1], {icon:endIcon}).addTo(map);
@@ -708,8 +709,8 @@
     const linePts = 'M' + pathPts.join(' L');
 
     svg.innerHTML =
-      '<path d="' + areaPts + '" fill="#2F5D62" opacity="0.12"></path>' +
-      '<path d="' + linePts + '" fill="none" stroke="#2F5D62" stroke-width="2"></path>';
+      '<path d="' + areaPts + '" fill="#00008B" opacity="0.12"></path>' +
+      '<path d="' + linePts + '" fill="none" stroke="#00008B" stroke-width="2"></path>';
   }
 
 })();
