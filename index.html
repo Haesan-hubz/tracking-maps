@@ -440,11 +440,11 @@
     if(!liveMarker){
       const icon = L.divIcon({
         className: '',
-        html: '<div style="width:16px;height:16px;border-radius:50%;background:#2F5D62;border:3px solid white;box-shadow:0 0 0 2px #2F5D62;"></div>',
+        html: '<div style="width:16px;height:16px;border-radius:50%;background:#ADD8E6;border:3px solid white;box-shadow:0 0 0 2px #ADD8E6;"></div>',
         iconSize:[16,16]
       });
       liveMarker = L.marker([lat, lon], {icon, zIndexOffset: 1000}).addTo(map);
-      liveAccuracyCircle = L.circle([lat, lon], {radius: accuracy, color:'#2F5D62', weight:1, fillOpacity:0.08}).addTo(map);
+      liveAccuracyCircle = L.circle([lat, lon], {radius: accuracy, color:'#ADD8E6', weight:1, fillOpacity:0.08}).addTo(map);
     } else {
       liveMarker.setLatLng([lat, lon]);
       liveAccuracyCircle.setLatLng([lat, lon]);
