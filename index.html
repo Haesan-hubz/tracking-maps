@@ -4,26 +4,26 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 <title>Trek Maps — Peninjau Jejak Strava</title>
-<lcoretan rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-<lcoretan rel="preconnect" href="https://fonts.googleapis.com">
-<lcoretan href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --kertas:#EAE6DA;
-    --kertas-raised:#F2EFE5;
-    --coretan:#23301F;
-    --coretan-soft:#5B6152;
-    --kontur:#9C9483;
-    --kontur-faint:#D8D3C3;
-    --garis:#B5562A;
-    --garis-dark:#8F4520;
-    --noda:#2F5D62;
+    --paper:#EAE6DA;
+    --paper-raised:#F2EFE5;
+    --ink:#23301F;
+    --ink-soft:#5B6152;
+    --contour:#9C9483;
+    --contour-faint:#D8D3C3;
+    --trail:#B5562A;
+    --trail-dark:#8F4520;
+    --tarn:#2F5D62;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
-    background:var(--kertas);
-    color:var(--coretan);
+    background:var(--paper);
+    color:var(--ink);
     font-family:'IBM Plex Sans', sans-serif;
     line-height:1.45;
     -webkit-tap-highlight-color:transparent;
@@ -35,7 +35,7 @@
   }
   header{
     padding:6px 0 20px;
-    border-bottom:1px solid var(--kontur);
+    border-bottom:1px solid var(--contour);
     margin-bottom:20px;
   }
   h1{
@@ -47,21 +47,21 @@
   }
   header p{
     margin:0;
-    color:var(--coretan-soft);
+    color:var(--ink-soft);
     font-size:14.5px;
     max-width:52ch;
   }
 
   .panel{
-    background:var(--kertas-raised);
-    border:1px solid var(--kontur-faint);
+    background:var(--paper-raised);
+    border:1px solid var(--contour-faint);
     border-radius:3px;
     padding:16px;
     margin-bottom:16px;
   }
 
   #dropzone{
-    border:1.5px dashed var(--kontur);
+    border:1.5px dashed var(--contour);
     border-radius:3px;
     padding:28px 16px;
     text-align:center;
@@ -69,12 +69,12 @@
     transition:border-color .15s ease, background .15s ease;
   }
   #dropzone.drag{
-    border-color:var(--garis);
+    border-color:var(--trail);
     background:rgba(181,86,42,0.06);
   }
   #dropzone svg{margin-bottom:10px;}
   #dropzone .title{font-size:16px;font-weight:600;margin-bottom:4px;}
-  #dropzone .hint{font-size:13px;color:var(--coretan-soft);}
+  #dropzone .hint{font-size:13px;color:var(--ink-soft);}
   input[type=file]{display:none;}
 
   .filelist{
@@ -90,23 +90,23 @@
     align-items:center;
     gap:8px;
     padding:8px 12px;
-    background:var(--kertas);
-    border:1px solid var(--kontur-faint);
+    background:var(--paper);
+    border:1px solid var(--contour-faint);
     border-radius:20px;
     font-size:13px;
     cursor:pointer;
     white-space:nowrap;
   }
   .filechip.active{
-    border-color:var(--garis);
+    border-color:var(--trail);
     background:rgba(181,86,42,0.08);
-    color:var(--garis-dark);
+    color:var(--trail-dark);
     font-weight:600;
   }
   .filechip button{
     border:none;
     background:none;
-    color:var(--coretan-soft);
+    color:var(--ink-soft);
     cursor:pointer;
     font-size:14px;
     line-height:1;
@@ -116,7 +116,7 @@
   #empty-state{
     text-align:center;
     padding:40px 16px;
-    color:var(--coretan-soft);
+    color:var(--ink-soft);
     font-size:14px;
   }
 
@@ -127,7 +127,7 @@
     min-height:280px;
     width:100%;
     border-radius:3px;
-    border:1px solid var(--kontur-faint);
+    border:1px solid var(--contour-faint);
   }
 
   .activity-name{
@@ -141,37 +141,37 @@
     display:grid;
     grid-template-columns:repeat(3, 1fr);
     gap:1px;
-    background:var(--kontur-faint);
-    border:1px solid var(--kontur-faint);
+    background:var(--contour-faint);
+    border:1px solid var(--contour-faint);
     border-radius:3px;
     overflow:hidden;
     margin-bottom:16px;
   }
   .stat{
-    background:var(--kertas-raised);
+    background:var(--paper-raised);
     padding:14px 16px;
   }
   .stat .label{
     font-size:12px;
-    color:var(--coretan-soft);
+    color:var(--ink-soft);
     margin-bottom:4px;
   }
   .stat .value{
     font-family:'IBM Plex Mono', monospace;
     font-weight:600;
     font-size:20px;
-    color:var(--coretan);
+    color:var(--ink);
   }
   .stat .value small{
     font-size:13px;
     font-weight:500;
-    color:var(--coretan-soft);
+    color:var(--ink-soft);
     margin-left:2px;
   }
 
   .elev-title{
     font-size:13px;
-    color:var(--coretan-soft);
+    color:var(--ink-soft);
     margin-bottom:8px;
   }
   #elevChart{
@@ -183,18 +183,18 @@
   footer{
     margin-top:24px;
     font-size:12.5px;
-    color:var(--coretan-soft);
+    color:var(--ink-soft);
     text-align:center;
   }
-  footer a{color:var(--garis-dark);}
+  footer a{color:var(--trail-dark);}
 
-  .leaflet-container{background:var(--kertas);}
+  .leaflet-container{background:var(--paper);}
 
   .navpanel{margin:12px 0 16px;}
   .navbtn{
     width:100%;
     padding:13px 16px;
-    background:var(--noda);
+    background:var(--tarn);
     color:#fff;
     border:none;
     border-radius:3px;
@@ -203,12 +203,12 @@
     font-weight:600;
     cursor:pointer;
   }
-  .navbtn.active{background:var(--garis);}
+  .navbtn.active{background:var(--trail);}
   .livestatus{
     margin-top:10px;
     padding:12px 14px;
-    background:var(--kertas-raised);
-    border:1px solid var(--kontur-faint);
+    background:var(--paper-raised);
+    border:1px solid var(--contour-faint);
     border-radius:3px;
   }
   .livestatus-row{
@@ -221,7 +221,7 @@
   }
   .dot{
     width:10px;height:10px;border-radius:50%;
-    background:var(--kontur);
+    background:var(--contour);
     flex:0 0 auto;
   }
   .dot.ok{background:#4C7A3C;}
@@ -231,17 +231,17 @@
     display:flex;
     justify-content:space-between;
     font-size:12.5px;
-    color:var(--coretan-soft);
+    color:var(--ink-soft);
     font-family:'IBM Plex Mono', monospace;
   }
-  .livestatus-sub b{color:var(--coretan);font-weight:600;}
+  .livestatus-sub b{color:var(--ink);font-weight:600;}
   .followToggle{
     display:flex;
     align-items:center;
     gap:8px;
     margin-top:10px;
     font-size:13px;
-    color:var(--coretan-soft);
+    color:var(--ink-soft);
     cursor:pointer;
   }
   .geo-warning{
@@ -251,7 +251,7 @@
     border:1px solid rgba(181,86,42,0.3);
     border-radius:3px;
     font-size:12.5px;
-    color:var(--garis-dark);
+    color:var(--trail-dark);
   }
 </style>
 </head>
@@ -260,7 +260,7 @@
 
   <header>
     <h1>Trek Maps</h1>
-    <p>Upload file GPX atau TCX hasil export dari Strava.</p>
+    <p>Upload file GPX atau TCX hasil export dari Strava, lihat jalurnya di peta langsung dari HP — tidak perlu server, tidak perlu satu WiFi dengan laptop.</p>
   </header>
 
   <div class="panel">
@@ -273,7 +273,7 @@
     <div class="filelist" id="filelist"></div>
   </div>
 
-  <div id="empty-state">Belum ada track yang dimuat. Upload file untuk mulai.</div>
+  <div id="empty-state">Belum ada jejak yang dimuat. Upload file di atas untuk mulai.</div>
 
   <div id="result">
     <div class="activity-name" id="activityName"></div>
@@ -320,8 +320,8 @@
 
   <footer>
     Semua diproses di HP kamu sendiri — file tidak dikirim ke server manapun.<br>
-    Website membutuhkan koneksi internet.<br>
-    Live tracking butuh halaman dibuka lewat https agar browser mengizinkan akses GPS.
+    Peta memakai tile dari OpenStreetMap, jadi tetap butuh koneksi internet (kuota kamu sendiri).<br>
+    Pelacakan posisi live butuh halaman dibuka lewat https agar browser mengizinkan akses GPS.
   </footer>
 
 </div>
@@ -440,11 +440,11 @@
     if(!liveMarker){
       const icon = L.divIcon({
         className: '',
-        html: '<div style="width:16px;height:16px;border-radius:50%;background:#ADD8E6;border:3px solid white;box-shadow:0 0 0 2px #ADD8E6;"></div>',
+        html: '<div style="width:16px;height:16px;border-radius:50%;background:#2F5D62;border:3px solid white;box-shadow:0 0 0 2px #2F5D62;"></div>',
         iconSize:[16,16]
       });
       liveMarker = L.marker([lat, lon], {icon, zIndexOffset: 1000}).addTo(map);
-      liveAccuracyCircle = L.circle([lat, lon], {radius: accuracy, color:'#ADD8E6', weight:1, fillOpacity:0.08}).addTo(map);
+      liveAccuracyCircle = L.circle([lat, lon], {radius: accuracy, color:'#2F5D62', weight:1, fillOpacity:0.08}).addTo(map);
     } else {
       liveMarker.setLatLng([lat, lon]);
       liveAccuracyCircle.setLatLng([lat, lon]);
@@ -596,7 +596,7 @@
 
   if(!window.isSecureContext){
     document.addEventListener('DOMContentLoaded', () => {
-      showGeoWarning('Halaman ini dibuka bukan lewat https, jadi pelacakan GPS live kemungkinan tidak akan diizcoretanan browser. Lihat instruksi hosting di bawah untuk mengaktifkannya.');
+      showGeoWarning('Halaman ini dibuka bukan lewat https, jadi pelacakan GPS live kemungkinan tidak akan diizinkan browser. Lihat instruksi hosting di bawah untuk mengaktifkannya.');
     });
   }
 
