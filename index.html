@@ -467,10 +467,10 @@
       const dot = document.getElementById('statusDot');
       const text = document.getElementById('statusText');
       document.getElementById('offRouteDist').textContent = Math.round(dist) + ' m';
-      if(dist <= 20){
+      if(dist <= 10){
         dot.className = 'dot ok';
         text.textContent = 'Di jalur yang benar';
-      } else if(dist <= 60){
+      } else if(dist <= 40){
         dot.className = 'dot warn';
         text.textContent = 'Melenceng dikit dari jalur';
       } else {
