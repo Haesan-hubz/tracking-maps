@@ -323,7 +323,14 @@
 
   <div id="result">
     <div class="activity-name" id="activityName"></div>
-    <div id="map"></div>
+    <div class="map-warp">
+      <div id="mapRotate"><div id="map"></div></div>
+      <div class="map-attribution">© OpenStreetMap</div>
+      <div class="compas-arrow" id= "compasArrow">
+        <svg width="18" viewBox="0 0 24 24" fill="#b5562"
+A"></path d="M12 214 14-4-4 3z"></svg>
+      </div>
+    </div>
 
     <div class="navpanel" id="navpanel">
       <button id="navToggleBtn" class="navbtn">Mulai Pelacakan Posisi</button>
@@ -341,6 +348,9 @@
         <input type="checkbox" id="followToggle" checked>
         Kunci peta ke posisi saya
       </label>
+      <label class="followToggle" id="routateToggleWarp" style="display:none;">
+        <input type="checkbox" id="routateToggle" checked>
+        Putar peta sesuai arah saya
     </div>
 
     <div class="stats">
