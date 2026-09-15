@@ -397,16 +397,45 @@ A"></path d="M12 214 14-4-4 3z"></svg>
   let liveDistanceM = 0;
   let lastLivePos = null;
 
+  let rorotateMap = true;
+  let currentHeading = null;
+  let orientationHandler = null;
+  const mapRotateEl = document.getElementById('mapRotate');
+  const compassArrow = document.getElementById('compasArrow');
+
+
   const navToggleBtn = document.getElementById('navToggleBtn');
   const liveStatus = document.getElementById('liveStatus');
   const followToggleWrap = document.getElementById('followToggleWrap');
   const followToggle = document.getElementById('followToggle');
+  const routateToggleWarp = document.getElementById('routateToggleWarp');
+  const routateToggle = document.getElementById('routateToggle');
 
   navToggleBtn.addEventListener('click', () => {
     if(watchId === null) startTracking(); else stopTracking();
   });
   followToggle.addEventListener('change', e => { followMap = e.target.checked; });
+  routateToggle.addEventListener('change', e => { rotateMap = e.target.checked;
+    if (!rotateMap) applyMapRotation(0);
+   });
+    
+   function applyMapRotation(deg){
+    mapRotateEl.style.transform = 'translate(-50%,-50%) rotate(' + headingDeg + 'deg)';
+    compassArrow.style.transform = 'rotate(' + headingDeg + 'deg)';
+   }
 
+  function onOrientationChange(event){
+    let headingDeg = null;
+    if(event.absolute && event.alpha != null){
+      headingDeg = 360 - event.alpha;
+    } else if(event.absolute && event.alpha != null){
+      headingDeg = 360 - event.webkitCompassHeading;
+    }
+    if(headingDeg != null){
+      currentHeading = headingDeg;
+      applyMapRotation(headingDeg);
+    }
+  }
   function startTracking(){
     if(!('geolocation' in navigator)){
       showGeoWarning('Browser ini tidak mendukung pelacakan GPS.');
