@@ -405,19 +405,17 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 (function(){
-  const tracks = []; // {id, name, points:[{lat,lon,ele,time}]}
+  const tracks = [];
   let activeId = null;
   let activePoints = null;
   let map = null, polyline = null, startMarker=null, endMarker=null;
 
-  // live tracking state
   let watchId = null;
   let liveMarker = null, liveAccuracyCircle = null;
   let followMap = true;
   let liveDistanceM = 0;
   let lastLivePos = null;
 
-  // compass/rotation state
   let rotateMap = true;
   let currentHeading = null;
   let orientationHandler = null;
@@ -458,9 +456,9 @@
   function onOrientation(event){
     let heading = null;
     if(typeof event.webkitCompassHeading === 'number'){
-      heading = event.webkitCompassHeading; // iOS: already compass-corrected
+      heading = event.webkitCompassHeading; 
     } else if(event.absolute && event.alpha != null){
-      heading = (360 - event.alpha) % 360; // Android absolute orientation
+      heading = (360 - event.alpha) % 360; 
     }
     if(heading == null) return;
     currentHeading = heading;
@@ -605,7 +603,6 @@
       map.setView([lat, lon], Math.max(map.getZoom(), 16));
     }
 
-    // fallback: use GPS-derived heading (only reliable while moving) if compass isn't active
     if(orientationHandler === null && pos.coords.heading != null && !isNaN(pos.coords.heading)){
       currentHeading = pos.coords.heading;
       if(rotateMap) applyRotation(currentHeading);
