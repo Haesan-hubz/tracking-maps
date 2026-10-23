@@ -405,17 +405,19 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 (function(){
-  const tracks = [];
+  const tracks = []; // {id, name, points:[{lat,lon,ele,time}]}
   let activeId = null;
   let activePoints = null;
   let map = null, polyline = null, startMarker=null, endMarker=null;
 
+  // live tracking state
   let watchId = null;
   let liveMarker = null, liveAccuracyCircle = null;
   let followMap = true;
   let liveDistanceM = 0;
   let lastLivePos = null;
 
+  // compass/rotation state
   let rotateMap = true;
   let currentHeading = null;
   let orientationHandler = null;
@@ -445,8 +447,18 @@
   }
   followMap = true;
   followToggle.checked = true;
+  rotateMap = true;
+  rotateToggle.checked = true;
+  if(currentHeading != null) applyRotation(currentHeading);
   map.setView([lastLivePos.lat, lastLivePos.lon], Math.max(map.getZoom(), 16));
 });
+   function pauseAutoFollow(){
+     followMap = false;
+     followToggle.checked = false;
+     rotateMap = false;
+     rotateToggle.checked = false;
+     applyRotation(0);
+   }
 
   function applyRotation(headingDeg){
     mapRotateEl.style.transform = 'translate(-50%,-50%) rotate(' + (-headingDeg) + 'deg)';
@@ -456,9 +468,9 @@
   function onOrientation(event){
     let heading = null;
     if(typeof event.webkitCompassHeading === 'number'){
-      heading = event.webkitCompassHeading; 
+      heading = event.webkitCompassHeading; // iOS: already compass-corrected
     } else if(event.absolute && event.alpha != null){
-      heading = (360 - event.alpha) % 360; 
+      heading = (360 - event.alpha) % 360; // Android absolute orientation
     }
     if(heading == null) return;
     currentHeading = heading;
@@ -603,6 +615,7 @@
       map.setView([lat, lon], Math.max(map.getZoom(), 16));
     }
 
+    // fallback: use GPS-derived heading (only reliable while moving) if compass isn't active
     if(orientationHandler === null && pos.coords.heading != null && !isNaN(pos.coords.heading)){
       currentHeading = pos.coords.heading;
       if(rotateMap) applyRotation(currentHeading);
@@ -777,6 +790,9 @@
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19
       }).addTo(map);
+      map.on('dragstart', () => {
+        if(watchId !== null) pauseAutoFollow();
+      });
     }
     if(polyline) map.removeLayer(polyline);
     if(startMarker) map.removeLayer(startMarker);
