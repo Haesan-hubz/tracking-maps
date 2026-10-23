@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-<title>Trek Maps — Peninjau Jejak Strava</title>
+<title>Trek Maps 53</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
@@ -16,7 +16,7 @@
     --contour:#9C9483;
     --contour-faint:#D8D3C3;
     --trail:#B5562A;
-    --trail-dark:#8F4520;
+    --trail-dark:#1c6d8b;
     --tarn:#2F5D62;
   }
   *{box-sizing:border-box;}
@@ -51,7 +51,7 @@
     font-size:14.5px;
     max-width:52ch;
   }
- 
+
   .panel{
     background:var(--paper-raised);
     border:1px solid var(--contour-faint);
@@ -59,7 +59,7 @@
     padding:16px;
     margin-bottom:16px;
   }
- 
+
   #dropzone{
     border:1.5px dashed var(--contour);
     border-radius:3px;
@@ -76,7 +76,7 @@
   #dropzone .title{font-size:16px;font-weight:600;margin-bottom:4px;}
   #dropzone .hint{font-size:13px;color:var(--ink-soft);}
   input[type=file]{display:none;}
- 
+
   .filelist{
     display:flex;
     gap:8px;
@@ -99,7 +99,7 @@
   }
   .filechip.active{
     border-color:var(--trail);
-    background:rgba(181,86,42,0.08);
+    background:rgba(33, 140, 186, 0.08);
     color:var(--trail-dark);
     font-weight:600;
   }
@@ -112,18 +112,19 @@
     line-height:1;
     padding:0;
   }
- 
+
   #empty-state{
     text-align:center;
     padding:40px 16px;
     color:var(--ink-soft);
     font-size:14px;
   }
- 
+
   #result{display:none;}
- 
+
   .map-wrap{
     position:relative;
+    overflow:hidden;
     height:46vh;
     min-height:280px;
     width:100%;
@@ -175,29 +176,27 @@
   }
   .center-btn{
     position:absolute;
-    left:8px;
     bottom:8px;
+    right:8px;
     width:40px;
     height:40px;
     z-index:500;
     background:var(--paper-raised);
     border:1px solid var(--contour);
     border-radius:50%;
-    display:none;
+    display:flex;
     align-items:center;
     justify-content:center;
-    cursor:pointer;
-    padding:0;
   }
-  .center-btn:active{background:var(--contour-faint);}
- 
+.center-btn:active{background:var(--contour-faint);}
+
   .activity-name{
     font-family:'Fraunces', serif;
     font-weight:600;
     font-size:20px;
     margin:16px 0 12px;
   }
- 
+
   .stats{
     display:grid;
     grid-template-columns:repeat(3, 1fr);
@@ -229,7 +228,7 @@
     color:var(--ink-soft);
     margin-left:2px;
   }
- 
+
   .elev-title{
     font-size:13px;
     color:var(--ink-soft);
@@ -240,7 +239,7 @@
     height:100px;
     display:block;
   }
- 
+
   footer{
     margin-top:24px;
     font-size:12.5px;
@@ -248,9 +247,9 @@
     text-align:center;
   }
   footer a{color:var(--trail-dark);}
- 
+
   .leaflet-container{background:var(--paper);}
- 
+
   .navpanel{margin:12px 0 16px;}
   .navbtn{
     width:100%;
@@ -287,7 +286,7 @@
   }
   .dot.ok{background:#4C7A3C;}
   .dot.warn{background:#C7912B;}
-  .dot.bad{background:#B5562A;}
+  .dot.bad{background:#c41f1f;}
   .livestatus-sub{
     display:flex;
     justify-content:space-between;
@@ -318,24 +317,24 @@
 </head>
 <body>
 <div class="wrap">
- 
+
   <header>
-    <h1>Trek Maps</h1>
-    <p>Upload file GPX atau TCX hasil export dari Strava, lihat jalurnya di peta langsung dari HP — tidak perlu server, tidak perlu satu WiFi dengan laptop.</p>
+    <h1>Trek Maps 53</h1>
+    <p>Upload file GPX atau TCX </p>
   </header>
- 
+
   <div class="panel">
     <div id="dropzone">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#B5562A" stroke-width="1.6"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
       <div class="title">Ketuk untuk pilih file</div>
-      <div class="hint">.gpx atau .tcx — bisa pilih beberapa sekaligus</div>
+      <div class="hint">Only .gpx atau .tcx</div>
     </div>
     <input type="file" id="fileInput" accept=".gpx,.tcx" multiple>
     <div class="filelist" id="filelist"></div>
   </div>
- 
-  <div id="empty-state">Belum ada jejak yang dimuat. Upload file di atas untuk mulai.</div>
- 
+
+  <div id="empty-state">Belum ada track yang dimuat. Upload file untuk mulai.</div>
+
   <div id="result">
     <div class="activity-name" id="activityName"></div>
     <div class="map-wrap">
@@ -344,14 +343,14 @@
       <div class="compass-arrow" id="compassArrow">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="#B5562A"><path d="M12 2l4 14-4-3-4 3z"/></svg>
       </div>
-      <button class="center-btn" id="centerBtn" title="Pusatkan ke posisi saya">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2F5D62" stroke-width="2" stroke-linecap="round">
-          <circle cx="12" cy="12" r="3.5"/>
-          <path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>
+      <button class="center-btn" id="centerBtn" title="My location">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2F5D62" stroke-width="2" stroke-linecap="round">
+        <circle cx="12" cy="12" r="3.5"/>
+        <path d="M12 2v2M12 18v4M2 12h4M18 12h4"/>
         </svg>
       </button>
     </div>
- 
+
     <div class="navpanel" id="navpanel">
       <button id="navToggleBtn" class="navbtn">Mulai Pelacakan Posisi</button>
       <div id="liveStatus" class="livestatus" style="display:none;">
@@ -360,7 +359,7 @@
           <span id="statusText">Mencari sinyal GPS…</span>
         </div>
         <div class="livestatus-sub">
-          <span>Jarak dari jalur: <b id="offRouteDist">–</b></span>
+          <span>Off route: <b id="offRouteDist">–</b></span>
           <span>Ditempuh: <b id="liveDistance">–</b></span>
         </div>
       </div>
@@ -373,7 +372,7 @@
         Putar peta searah gerakan
       </label>
     </div>
- 
+
     <div class="stats">
       <div class="stat">
         <div class="label">Jarak</div>
@@ -388,21 +387,21 @@
         <div class="value" id="statElev">–</div>
       </div>
     </div>
- 
+
     <div class="panel">
       <div class="elev-title">Profil elevasi</div>
       <svg id="elevChart" viewBox="0 0 600 100" preserveAspectRatio="none"></svg>
     </div>
   </div>
- 
+
   <footer>
-    Semua diproses di HP kamu sendiri — file tidak dikirim ke server manapun.<br>
-    Peta memakai tile dari OpenStreetMap, jadi tetap butuh koneksi internet (kuota kamu sendiri).<br>
-    Pelacakan posisi live butuh halaman dibuka lewat https agar browser mengizinkan akses GPS.
+    Pelacakan posisi secara real time membutuhkan izin akses lokasi.<br>
+    Peta memakai tile dari OpenStreetMap, jadi tetap memerlukan koneksi internet.<br>
+    File tidak dikirim ke server manapun.
   </footer>
- 
+
 </div>
- 
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 (function(){
@@ -410,21 +409,21 @@
   let activeId = null;
   let activePoints = null;
   let map = null, polyline = null, startMarker=null, endMarker=null;
- 
+
   // live tracking state
   let watchId = null;
   let liveMarker = null, liveAccuracyCircle = null;
   let followMap = true;
   let liveDistanceM = 0;
   let lastLivePos = null;
- 
+
   // compass/rotation state
   let rotateMap = true;
   let currentHeading = null;
   let orientationHandler = null;
   const mapRotateEl = document.getElementById('mapRotate');
   const compassArrow = document.getElementById('compassArrow');
- 
+
   const navToggleBtn = document.getElementById('navToggleBtn');
   const liveStatus = document.getElementById('liveStatus');
   const followToggleWrap = document.getElementById('followToggleWrap');
@@ -432,7 +431,7 @@
   const rotateToggleWrap = document.getElementById('rotateToggleWrap');
   const rotateToggle = document.getElementById('rotateToggle');
   const centerBtn = document.getElementById('centerBtn');
- 
+
   navToggleBtn.addEventListener('click', () => {
     if(watchId === null) startTracking(); else stopTracking();
   });
@@ -441,33 +440,31 @@
     rotateMap = e.target.checked;
     if(!rotateMap) applyRotation(0);
   });
-  centerBtn.addEventListener('click', () => {
-    if(!lastLivePos){
-      document.getElementById('statusText').textContent = 'Belum ada posisi GPS, tunggu sebentar…';
-      return;
-    }
-    followMap = true;
-    followToggle.checked = true;
-    rotateMap = true;
-    rotateToggle.checked = true;
-    if(currentHeading != null) applyRotation(currentHeading);
-    map.setView([lastLivePos.lat, lastLivePos.lon], Math.max(map.getZoom(), 16));
-  });
- 
-  // saat user menggeser peta: hentikan kunci posisi & rotasi sementara
-  function pauseAutoFollow(){
-    followMap = false;
-    followToggle.checked = false;
-    rotateMap = false;
-    rotateToggle.checked = false;
-    applyRotation(0);
+ centerBtn.addEventListener('click', () => {
+  if(!lastLivePos){
+    document.getElementById('statusText').textContent = 'Belum ada posisi GPS, tunggu sebentar…';
+    return;
   }
- 
+  followMap = true;
+  followToggle.checked = true;
+  rotateMap = true;
+  rotateToggle.checked = true;
+  if(currentHeading != null) applyRotation(currentHeading);
+  map.setView([lastLivePos.lat, lastLivePos.lon], Math.max(map.getZoom(), 16));
+});
+   function pauseAutoFollow(){
+     followMap = false;
+     followToggle.checked = false;
+     rotateMap = false;
+     rotateToggle.checked = false;
+     applyRotation(0);
+   }
+
   function applyRotation(headingDeg){
     mapRotateEl.style.transform = 'translate(-50%,-50%) rotate(' + (-headingDeg) + 'deg)';
     compassArrow.style.transform = 'rotate(' + headingDeg + 'deg)';
   }
- 
+
   function onOrientation(event){
     let heading = null;
     if(typeof event.webkitCompassHeading === 'number'){
@@ -479,7 +476,7 @@
     currentHeading = heading;
     if(rotateMap) applyRotation(currentHeading);
   }
- 
+
   function startCompass(){
     compassArrow.style.display = 'flex';
     rotateToggleWrap.style.display = 'flex';
@@ -491,13 +488,13 @@
     if(typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function'){
       DeviceOrientationEvent.requestPermission().then(state => {
         if(state === 'granted') start();
-        else showGeoWarning('Izin sensor arah ditolak — peta tidak bisa berputar otomatis, tapi pelacakan posisi tetap jalan.');
+        else showGeoWarning('Izin sensor arah ditolak. Aktifkan izin sensor arah untuk situs ini di pengaturan browser.');
       }).catch(() => start());
     } else {
       start();
     }
   }
- 
+
   function stopCompass(){
     if(orientationHandler){
       window.removeEventListener('deviceorientationabsolute', orientationHandler, true);
@@ -509,7 +506,7 @@
     rotateToggleWrap.style.display = 'none';
     applyRotation(0);
   }
- 
+
   function startTracking(){
     if(!('geolocation' in navigator)){
       showGeoWarning('Browser ini tidak mendukung pelacakan GPS.');
@@ -522,7 +519,7 @@
     navToggleBtn.textContent = 'Hentikan Pelacakan';
     navToggleBtn.classList.add('active');
     document.getElementById('statusText').textContent = 'Mencari sinyal GPS…';
- 
+
     watchId = navigator.geolocation.watchPosition(onLivePosition, onGeoError, {
       enableHighAccuracy: true,
       maximumAge: 1000,
@@ -531,7 +528,7 @@
     startCompass();
     centerBtn.style.display = 'flex';
   }
- 
+
   function stopTracking(){
     if(watchId !== null){
       navigator.geolocation.clearWatch(watchId);
@@ -544,7 +541,7 @@
     stopCompass();
     centerBtn.style.display = 'none';
   }
- 
+
   function onGeoError(err){
     let msg = 'Tidak bisa mengambil lokasi.';
     if(err.code === 1) msg = 'Izin lokasi ditolak. Aktifkan izin lokasi untuk situs ini di pengaturan browser.';
@@ -556,7 +553,7 @@
     document.getElementById('statusText').textContent = msg;
     document.getElementById('statusDot').className = 'dot bad';
   }
- 
+
   function showGeoWarning(msg){
     let el = document.getElementById('geoWarning');
     if(!el){
@@ -567,14 +564,14 @@
     }
     el.textContent = msg;
   }
- 
+
   function toXY(lat, lon, refLat){
     const R = 6371000;
     const x = (lon * Math.PI/180) * R * Math.cos(refLat * Math.PI/180);
     const y = (lat * Math.PI/180) * R;
     return {x, y};
   }
- 
+
   function distPointToSegment(p, a, b){
     const dx = b.x - a.x, dy = b.y - a.y;
     const lenSq = dx*dx + dy*dy;
@@ -583,7 +580,7 @@
     t = Math.max(0, Math.min(1, t));
     return Math.hypot(p.x - (a.x + t*dx), p.y - (a.y + t*dy));
   }
- 
+
   function nearestDistanceToRoute(lat, lon, points){
     const ref = toXY(lat, lon, lat);
     let minDist = Infinity;
@@ -595,11 +592,11 @@
     }
     return minDist;
   }
- 
+
   function onLivePosition(pos){
     const lat = pos.coords.latitude, lon = pos.coords.longitude;
     const accuracy = pos.coords.accuracy || 0;
- 
+
     if(!liveMarker){
       const icon = L.divIcon({
         className: '',
@@ -613,47 +610,47 @@
       liveAccuracyCircle.setLatLng([lat, lon]);
       liveAccuracyCircle.setRadius(accuracy);
     }
- 
+
     if(followMap){
       map.setView([lat, lon], Math.max(map.getZoom(), 16));
     }
- 
+
     // fallback: use GPS-derived heading (only reliable while moving) if compass isn't active
     if(orientationHandler === null && pos.coords.heading != null && !isNaN(pos.coords.heading)){
       currentHeading = pos.coords.heading;
       if(rotateMap) applyRotation(currentHeading);
     }
- 
+
     if(lastLivePos){
       liveDistanceM += haversine(lastLivePos, {lat, lon});
     }
     lastLivePos = {lat, lon};
     document.getElementById('liveDistance').textContent = (liveDistanceM/1000).toFixed(2) + ' km';
- 
+
     if(activePoints && activePoints.length > 1){
       const dist = nearestDistanceToRoute(lat, lon, activePoints);
       const dot = document.getElementById('statusDot');
       const text = document.getElementById('statusText');
       document.getElementById('offRouteDist').textContent = Math.round(dist) + ' m';
-      if(dist <= 20){
+      if(dist <= 5){
         dot.className = 'dot ok';
         text.textContent = 'Di jalur yang benar';
-      } else if(dist <= 60){
+      } else if(dist <= 10){
         dot.className = 'dot warn';
-        text.textContent = 'Agak melenceng dari jalur';
+        text.textContent = 'Melenceng dikit jirr';
       } else {
         dot.className = 'dot bad';
-        text.textContent = 'Keluar jalur — cek arah lagi';
+        text.textContent = 'Keluar Jalur woi!!';
       }
     }
   }
- 
+
   const dropzone = document.getElementById('dropzone');
   const fileInput = document.getElementById('fileInput');
   const filelist = document.getElementById('filelist');
   const emptyState = document.getElementById('empty-state');
   const resultEl = document.getElementById('result');
- 
+
   dropzone.addEventListener('click', () => fileInput.click());
   ['dragover','dragenter'].forEach(ev => dropzone.addEventListener(ev, e => {
     e.preventDefault(); dropzone.classList.add('drag');
@@ -668,7 +665,7 @@
     if(e.target.files.length) handleFiles(e.target.files);
     fileInput.value = '';
   });
- 
+
   function handleFiles(fileListObj){
     Array.from(fileListObj).forEach(file => {
       const reader = new FileReader();
@@ -693,7 +690,7 @@
       reader.readAsText(file);
     });
   }
- 
+
   function parseGPX(text){
     const xml = new DOMParser().parseFromString(text, 'application/xml');
     const trkpts = Array.from(xml.getElementsByTagName('trkpt'));
@@ -708,7 +705,7 @@
       };
     }).filter(p => !isNaN(p.lat) && !isNaN(p.lon));
   }
- 
+
   function parseTCX(text){
     const xml = new DOMParser().parseFromString(text, 'application/xml');
     const tps = Array.from(xml.getElementsByTagName('Trackpoint'));
@@ -728,7 +725,7 @@
       };
     }).filter(p => p && !isNaN(p.lat) && !isNaN(p.lon));
   }
- 
+
   function renderFileList(){
     filelist.innerHTML = '';
     tracks.forEach(t => {
@@ -737,7 +734,7 @@
       chip.innerHTML = '<span class="chipname"></span>';
       chip.querySelector('.chipname').textContent = t.name;
       chip.addEventListener('click', () => selectTrack(t.id));
- 
+
       const removeBtn = document.createElement('button');
       removeBtn.textContent = '✕';
       removeBtn.title = 'Hapus';
@@ -755,37 +752,37 @@
       filelist.appendChild(chip);
     });
   }
- 
+
   function showEmpty(){
     emptyState.style.display = 'block';
     resultEl.style.display = 'none';
     stopTracking();
     activePoints = null;
   }
- 
+
   if(!window.isSecureContext){
     document.addEventListener('DOMContentLoaded', () => {
       showGeoWarning('Halaman ini dibuka bukan lewat https, jadi pelacakan GPS live kemungkinan tidak akan diizinkan browser. Lihat instruksi hosting di bawah untuk mengaktifkannya.');
     });
   }
- 
+
   function selectTrack(id){
     activeId = id;
     renderFileList();
     const track = tracks.find(t => t.id === id);
     if(!track) return showEmpty();
- 
+
     emptyState.style.display = 'none';
     resultEl.style.display = 'block';
     document.getElementById('activityName').textContent = track.name;
     activePoints = track.points;
     stopTracking();
- 
+
     drawMap(track.points);
     drawStats(track.points);
     drawElevation(track.points);
   }
- 
+
   function drawMap(points){
     const latlngs = points.map(p => [p.lat, p.lon]);
     if(!map){
@@ -800,18 +797,18 @@
     if(polyline) map.removeLayer(polyline);
     if(startMarker) map.removeLayer(startMarker);
     if(endMarker) map.removeLayer(endMarker);
- 
+
     polyline = L.polyline(latlngs, {color:'#B5562A', weight:4, opacity:0.9}).addTo(map);
- 
+
     const startIcon = L.divIcon({className:'', html:'<div style="width:12px;height:12px;border-radius:50%;background:#2F5D62;border:2px solid white;"></div>', iconSize:[12,12]});
     const endIcon = L.divIcon({className:'', html:'<div style="width:12px;height:12px;border-radius:50%;background:#B5562A;border:2px solid white;"></div>', iconSize:[12,12]});
     startMarker = L.marker(latlngs[0], {icon:startIcon}).addTo(map);
     endMarker = L.marker(latlngs[latlngs.length-1], {icon:endIcon}).addTo(map);
- 
+
     map.fitBounds(polyline.getBounds(), {padding:[24,24]});
     setTimeout(() => map.invalidateSize(), 150);
   }
- 
+
   function haversine(a, b){
     const R = 6371000;
     const toRad = d => d * Math.PI / 180;
@@ -821,7 +818,7 @@
     const h = Math.sin(dLat/2)**2 + Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)**2;
     return 2 * R * Math.asin(Math.sqrt(h));
   }
- 
+
   function drawStats(points){
     let distance = 0;
     let elevGain = 0;
@@ -833,17 +830,17 @@
       }
     }
     const distKm = distance / 1000;
- 
+
     let durationMs = null;
     const first = points.find(p => p.time);
     const last = [...points].reverse().find(p => p.time);
     if(first && last && last.time > first.time){
       durationMs = last.time - first.time;
     }
- 
+
     document.getElementById('statDistance').innerHTML = distKm.toFixed(2) + '<small>km</small>';
     document.getElementById('statElev').innerHTML = Math.round(elevGain) + '<small>m</small>';
- 
+
     if(durationMs != null){
       const totalMin = durationMs / 60000;
       const h = Math.floor(totalMin / 60);
@@ -853,7 +850,7 @@
       document.getElementById('statDuration').innerHTML = '–';
     }
   }
- 
+
   function drawElevation(points){
     const svg = document.getElementById('elevChart');
     const elevs = points.map(p => p.ele).filter(e => e != null);
@@ -865,7 +862,7 @@
     const max = Math.max(...elevs);
     const range = (max - min) || 1;
     const w = 600, h = 100, pad = 6;
- 
+
     const step = w / (points.length - 1);
     let pathPts = [];
     points.forEach((p, i) => {
@@ -874,18 +871,16 @@
       const y = pad + (1 - (p.ele - min) / range) * (h - pad*2);
       pathPts.push(x.toFixed(1) + ',' + y.toFixed(1));
     });
- 
+
     const areaPts = 'M0,' + h + ' L' + pathPts.join(' L') + ' L' + w + ',' + h + ' Z';
     const linePts = 'M' + pathPts.join(' L');
- 
+
     svg.innerHTML =
       '<path d="' + areaPts + '" fill="#2F5D62" opacity="0.12"></path>' +
       '<path d="' + linePts + '" fill="none" stroke="#2F5D62" stroke-width="2"></path>';
   }
- 
+
 })();
 </script>
 </body>
 </html>
- 
-Claude finished the response
