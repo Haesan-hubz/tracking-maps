@@ -788,7 +788,7 @@
     if(!map){
       map = L.map('map', {zoomControl:false, attributionControl:false});
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19
+        maxZoom: 24
       }).addTo(map);
       map.on('dragstart', () => {
         if(watchId !== null) pauseAutoFollow();
